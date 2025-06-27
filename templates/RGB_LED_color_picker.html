@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>RGB LED 色彩控制器</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="static/js/bower_components/webduino-js/dist/webduino-all.js"></script>
+  <script src="static/js/webduino-blockly.js"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #1e1e1e;
+      color: #fff;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      margin: 30px 0 10px;
+      font-size: 2em;
+      text-align: center;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .color-box {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(255,255,255,0.4);
+      margin: 30px auto;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .picker-label {
+      margin: 10px 0 8px;
+      font-size: 1.2em;
+    }
+
+    input[type="color"] {
+      -webkit-appearance: none;
+      border: none;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    input[type="color"]:hover {
+      transform: scale(1.1);
+    }
+
+    @media (max-width: 600px) {
+      h2 {
+        font-size: 1.5em;
+      }
+
+      .color-box {
+        width: 100px;
+        height: 100px;
+      }
+
+      input[type="color"] {
+        width: 80px;
+        height: 80px;
+      }
+
+      .picker-label {
+        font-size: 1em;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Webduino RGB 三色 LED 色彩控制器</h2>
+
+  <div class="container">
+    <div class="color-box" id="colorDisplay"></div>
+    <div class="picker-label">請選擇顏色</div>
+    <input type="color" id="colorPicker" value="#ff0000">
+  </div>
+
+  <script>
+    let rgbled;
+    const colorPicker = document.getElementById("colorPicker");
+    const colorDisplay = document.getElementById("colorDisplay");
+
+    boardReady({board: 'Smart', device: '10QbmGAV', transport: 'mqtt'}, function (board) {
+      board.systemReset();
+      board.samplingInterval = 50;
+
+      rgbled = getRGBLedCathode(board, 15, 12, 13);
+      rgbled.setColor("#000000");
+
+      updateColor(colorPicker.value);
+
+      colorPicker.addEventListener("input", function () {
+        updateColor(this.value);
+      });
+    });
+
+    function updateColor(hexColor) {
+      if (rgbled) {
+        rgbled.setColor(hexColor);
+      }
+      colorDisplay.style.backgroundColor = hexColor;
+      colorDisplay.style.boxShadow = `0 0 30px 10px ${hexColor}`;
+    }
+  </script>
+
+</body>
+</html>

@@ -15,6 +15,10 @@ def matrix_control():
 def photocell_display():
     return render_template("./photocell_display.html")
 
+@app.route("/RGB_LED_color_picker")
+def RGB_LED_color_picker():
+    return render_template("./RGB_LED_color_picker.html")
+
 @app.route('/send_matrix', methods=['POST'])
 def send_matrix():
     data = request.get_json()
