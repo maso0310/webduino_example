@@ -8,10 +8,11 @@ def home():
     return "Hello from Gunicorn + Flask on VPS at /webduino/"
 
 @app.route("/matrix_control")
-def index():
+def matrix_control():
     return render_template("./matrix_control.html")
 
 @app.route("/photocell_display")
+def photocell_display():
     return render_template("./photocell_display.html")
 
 @app.route('/send_matrix', methods=['POST'])
