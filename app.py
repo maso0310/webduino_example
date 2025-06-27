@@ -11,6 +11,9 @@ def home():
 def index():
     return render_template("./matrix_control.html")
 
+@app.route("/photocell_display")
+    return render_template("./photocell_display.html")
+
 @app.route('/send_matrix', methods=['POST'])
 def send_matrix():
     data = request.get_json()

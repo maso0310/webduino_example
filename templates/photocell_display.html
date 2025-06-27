@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>光敏電阻即時數值顯示</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="static/js/bower_components/webduino-js/dist/webduino-all.js"></script>
+  <script src="static/js/webduino-blockly.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: sans-serif;
+      background: #1e1e1e;
+      color: #fff;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    #lightValue {
+      font-size: 48px;
+      font-weight: bold;
+      margin-top: 40px;
+      color: #00e676;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Webduino 光敏電阻數值顯示</h2>
+  <div id="lightValue">讀取中...</div>
+
+  <script>
+    let photocell;
+    const valueDisplay = document.getElementById('lightValue');
+
+    boardReady({ board: 'Smart', device: '10QbmGAV', transport: 'mqtt' }, function (board) {
+      board.systemReset();
+      board.samplingInterval = 100;
+
+      photocell = getPhotocell(board, 5); // A5 腳位
+
+      photocell.on(function(val) {
+        valueDisplay.textContent = val;
+      });
+    });
+  </script>
+
+</body>
+</html>
