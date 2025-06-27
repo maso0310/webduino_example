@@ -7,44 +7,111 @@
   <script src="static/js/bower_components/webduino-js/dist/webduino-all.js"></script>
   <script src="static/js/webduino-blockly.js"></script>
   <style>
-    body {
+    html, body {
+      height: 100%;
       margin: 0;
-      padding: 20px;
       font-family: sans-serif;
       background: #1e1e1e;
       color: #fff;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 20px;
       text-align: center;
     }
 
-    h2 {
-      margin-bottom: 20px;
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
     }
 
     #lightValue {
-      font-size: 48px;
+      font-size: 2em;
       font-weight: bold;
-      margin-top: 40px;
+      margin-top: 20px;
       color: #00e676;
+    }
+
+    .bulb {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background-color: #333;
+      box-shadow: 0 0 20px rgba(255, 255, 100, 0);
+      transition: all 0.2s ease-in-out;
+    }
+
+    @media (min-width: 768px) {
+      .bulb {
+        width: 200px;
+        height: 200px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .bulb {
+        width: 100px;
+        height: 100px;
+      }
+
+      #lightValue {
+        font-size: 1.5em;
+      }
     }
   </style>
 </head>
 <body>
 
-  <h2>Webduino 光敏電阻數值顯示</h2>
-  <div id="lightValue">讀取中...</div>
+  <header>
+    <h2>Webduino 光敏電阻數值顯示</h2>
+  </header>
+
+  <main>
+    <div class="bulb" id="bulb"></div>
+    <div id="lightValue">讀取中...</div>
+  </main>
 
   <script>
-    let photocell;
-    const valueDisplay = document.getElementById('lightValue');
+    var photocell, matrix;
+    const valueDisplay = document.getElementById("lightValue");
+    const bulb = document.getElementById("bulb");
 
-    boardReady({ board: 'Smart', device: '10QbmGAV', transport: 'mqtt' }, function (board) {
+    function updateBulbBrightness(val) {
+      const brightness = Math.max(0, Math.min(1, val));
+      const intensity = Math.floor(255 * brightness);
+      const glow = brightness * 120;
+
+      bulb.style.backgroundColor = `rgb(${intensity}, ${intensity}, 100)`;
+      bulb.style.boxShadow = `0 0 ${glow}px ${glow / 2}px rgba(255, 255, 120, ${brightness})`;
+    }
+
+    boardReady({board: 'Smart', device: '10QbmGAV', transport: 'mqtt'}, function (board) {
       board.systemReset();
       board.samplingInterval = 100;
 
-      photocell = getPhotocell(board, 5); // A5 腳位
+      matrix = getMax7219(board, 14, 12, 13);
+      matrix.animateStop();
 
+      photocell = getPhotocell(board, 0);
       photocell.on(function(val) {
-        valueDisplay.textContent = val;
+        valueDisplay.textContent = val.toFixed(2);
+        updateBulbBrightness(val);
+
+        if (val < 0.5) {
+          matrix.on('0000000000000000');
+        } else {
+          matrix.on('1026464040462610');
+        }
       });
     });
   </script>
