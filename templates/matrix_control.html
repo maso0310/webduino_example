@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>Webduino 8x8 點矩陣控制台</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="static/js/bower_components/webduino-js/dist/webduino-all.js"></script>
+  <script src="static/js/webduino-blockly.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: sans-serif;
+      background: #1e1e1e;
+      color: #fff;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      gap: 1.5vw;
+      margin: 0 auto;
+      width: 80vmin;
+      height: 80vmin;
+      max-width: 400px;
+      max-height: 400px;
+    }
+
+    .cell {
+      width: 100%;
+      height: 100%;
+      background-color: #333;
+      border-radius: 6px;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      box-shadow: inset 0 0 4px #000000aa;
+    }
+
+    .cell.active {
+      background-color: #00c853;
+      box-shadow: 0 0 6px #00c853;
+    }
+
+    .cell:active {
+      transform: scale(0.95);
+      filter: brightness(1.1);
+    }
+
+    button {
+      margin-top: 24px;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #00c853;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.96);
+      filter: brightness(0.9);
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        width: 90vmin;
+        height: 90vmin;
+        gap: 2vw;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Webduino 8x8 點矩陣控制</h2>
+  <div class="grid" id="matrixGrid"></div>
+  <button onclick="sendToMatrix()">顯示圖案</button>
+
+  <script>
+    let matrix;
+    const matrixGrid = document.getElementById('matrixGrid');
+    const matrixState = [];
+
+    // 建立 8x8 格子
+    for (let y = 0; y < 8; y++) {
+      matrixState[y] = [];
+      for (let x = 0; x < 8; x++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.x = x;
+        cell.dataset.y = y;
+        cell.addEventListener('click', () => {
+          cell.classList.toggle('active');
+          matrixState[y][x] = cell.classList.contains('active') ? 1 : 0;
+        });
+        matrixGrid.appendChild(cell);
+        matrixState[y][x] = 0;
+      }
+    }
+
+    // 初始化 Webduino Smart
+    boardReady({ board: 'Smart', device: '10QbmGAV', transport: 'mqtt' }, function (board) {
+      board.systemReset();
+      board.samplingInterval = 50;
+      matrix = getMax7219(board, 14, 12, 13); // CLK, CS, DIN 對應 D5, D6, D7
+      matrix.animateStop();
+
+      // 首次連線才清空
+      if (!localStorage.getItem('matrix_initialized')) {
+        matrix.on("0000000000000000");
+        localStorage.setItem('matrix_initialized', 'true');
+      }
+    });
+
+    // 傳送點陣資料（轉置後轉成 HEX）
+    function sendToMatrix() {
+    const hexString = matrixState[0].map((_, x) => {
+        const binaryStr = matrixState.map(row => row[x]) // 水平反轉
+                                    .reverse()              // 垂直反轉
+                                    .map(b => b).join('');
+        return parseInt(binaryStr, 2).toString(16).padStart(2, '0');
+    }).join('');
+
+    if (matrix) {
+        matrix.on(hexString);
+        console.log("送出 HEX（轉置 + 180 度）:", hexString);
+    } else {
+        alert("尚未連接 Webduino Smart 或 matrix 尚未初始化");
+    }
+    }
+  </script>
+
+</body>
+</html>
