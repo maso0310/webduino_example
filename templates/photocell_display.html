@@ -107,27 +107,25 @@
         valueDisplay.textContent = val.toFixed(2);
         updateBulbBrightness(val);
 
-        if (val == 1.0) {
-          matrix.on("ffffffffffffffff");;
-        } else if (val <1.0) {
+        if (val === 1.0) {
+          matrix.on("ffffffffffffffff");
+        } else if (val >= 0.9 && val < 1.0) {
           matrix.on("3c7effffffff7e3c");
-        } else if (val <0.9){
-          matrix.on("3c7effffffff7e3c");
-        } else if (val < 0.8){
+        } else if (val >= 0.8 && val < 0.9) {
           matrix.on("187e7effff7e7e18");
-        } else if (val <0.7){
+        } else if (val >= 0.7 && val < 0.8) {
           matrix.on("083c7efe7f7e3c10");
-        } else if (val <0.6){
+        } else if (val >= 0.6 && val < 0.7) {
           matrix.on("001c7c7e7e3e3800");
-        } else if (val <0.5){
+        } else if (val >= 0.5 && val < 0.6) {
           matrix.on("00047c3c3c3e2000");
-        } else if (val <0.4){
+        } else if (val >= 0.4 && val < 0.5) {
           matrix.on("00003c3c3c3c0000");
-        } else if (val <0.3){
+        } else if (val >= 0.3 && val < 0.4) {
           matrix.on("0000183c3c180000");
-        } else if (val <0.2){
+        } else if (val >= 0.2 && val < 0.3) {
           matrix.on("0000001818000000");
-        } else if (val <0.1){
+        } else {
           matrix.on("0000000000000000");
         }
       });
