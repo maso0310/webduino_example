@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>Webduino 蜂鳴器鋼琴</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="static/js/bower_components/webduino-js/dist/webduino-all.js"></script>
+  <script src="static/js/webduino-blockly.js"></script>
+  <style>
+    body {
+      background-color: #1e1e1e;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    .piano {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      max-width: 400px;
+      margin: 0 auto 30px;
+    }
+
+    .key {
+      width: 100%;
+      aspect-ratio: 3;
+      background: white;
+      border: 3px solid #444;
+      border-radius: 10px;
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #000;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .key:active {
+      transform: scale(0.95);
+      background: #ffe066;
+    }
+
+    .melody-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .melody-buttons button {
+      padding: 10px;
+      font-size: 1em;
+      border: none;
+      border-radius: 6px;
+      background-color: #3399ff;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .melody-buttons button:hover {
+      background-color: #1e7bd1;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Webduino 有源蜂鳴器鋼琴</h2>
+
+  <div class="piano">
+    <button class="key" onclick="playNote('C4')">1 (C4)</button>
+    <button class="key" onclick="playNote('D4')">2 (D4)</button>
+    <button class="key" onclick="playNote('E4')">3 (E4)</button>
+    <button class="key" onclick="playNote('F4')">4 (F4)</button>
+    <button class="key" onclick="playNote('G4')">5 (G4)</button>
+    <button class="key" onclick="playNote('A4')">6 (A4)</button>
+    <button class="key" onclick="playNote('B4')">7 (B4)</button>
+    <button class="key" onclick="playNote('C5')">8 (C5)</button>
+    <button class="key" onclick="playNote('D5')">9 (D5)</button>
+    <button class="key" onclick="playNote('E5')">10 (E5)</button>
+    <button class="key" onclick="playNote('F5')">11 (F5)</button>
+    <button class="key" onclick="playNote('G5')">12 (G5)</button>
+    <button class="key" onclick="playNote('A5')">13 (A5)</button>
+    <button class="key" onclick="playNote('B5')">14 (B5)</button>
+    <button class="key" onclick="playNote('C6')">15 (C6)</button>
+  </div>
+
+  <div class="melody-buttons">
+    <button onclick="playMelody('twinkle')">播放小星星</button>
+    <button onclick="playMelody('mario')">播放超級瑪莉</button>
+    <button onclick="playMelody('totoro')">播放龍貓</button>
+  </div>
+
+  <script>
+    var buzzer;
+
+    function buzzer_music(m) {
+      const musicNotes = { notes: [], tempos: [] };
+      m.forEach(item => {
+        musicNotes.notes = musicNotes.notes.concat(item.notes);
+        musicNotes.tempos = musicNotes.tempos.concat(item.tempos);
+      });
+      return musicNotes;
+    }
+
+    boardReady({ board: 'Smart', device: '10dW487y', transport: 'mqtt' }, function (board) {
+      board.systemReset();
+      board.samplingInterval = 50;
+      buzzer = getBuzzer(board, 5);
+    });
+
+    function playNote(note) {
+      if (!buzzer) return;
+      const music = buzzer_music([{ notes: note, tempos: '8' }]);
+      buzzer.play(music.notes, music.tempos);
+    }
+
+    const melodies = {
+      twinkle: {
+        notes: ['C5','C5','G5','G5','A5','A5','G5',
+                'F5','F5','E5','E5','D5','D5','C5'],
+        tempos: ['4','4','4','4','4','4','2',
+                 '4','4','4','4','4','4','2']
+      },
+      mario: {
+        notes: ['E5','E5', ,'E5', ,'C5','E5', ,'G5', , , ,
+                'G4', , , ],
+        tempos: ['8','8','8','8','8','8','8','8','4','8','8','8',
+                 '4','8','8','8']
+      },
+      totoro: {
+        notes: ["C6","D6","E6","F6","G6",null,"E6","C6",null,"G6",null,"F6",null,"D6",
+                null,null,null,null,null,null,"F6",null,"D6","B5",null,"F6",null,"E6",null,"C6"],
+        tempos: ["8","8","8","8","8","8","8","8","8","8","8","8","8","8",
+                 "8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8","8"]
+      }
+    };
+
+    function playMelody(name) {
+      if (!buzzer || !melodies[name]) return;
+      const m = melodies[name];
+      const music = buzzer_music([{ notes: m.notes, tempos: m.tempos }]);
+      buzzer.play(music.notes, music.tempos);
+    }
+  </script>
+
+</body>
+</html>

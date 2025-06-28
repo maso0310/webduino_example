@@ -19,6 +19,10 @@ def photocell_display():
 def RGB_LED_color_picker():
     return render_template("./RGB_LED_color_picker.html")
 
+@app.route("/piano")
+def piano():
+    return render_template("./piano.html")
+
 @app.route('/send_matrix', methods=['POST'])
 def send_matrix():
     data = request.get_json()
